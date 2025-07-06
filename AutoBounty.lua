@@ -71,15 +71,55 @@ uis.InputBegan:Connect(function(input)
     end
 end)
 
--- Main Loop Features
 rs.RenderStepped:Connect(function()
     if settings.FlyDash then
-        -- Fly Dash simple
         local char = plr.Character
         if char and char:FindFirstChild("HumanoidRootPart") then
             char.Humanoid:ChangeState(11)
         end
     end
+
+    if settings.NoCooldown then
+        for _,v in pairs(getgc(true)) do
+            if type(v) == "table" and rawget(v, "Cooldown") then
+                v.Cooldown = 0
+            end
+        end
+    end
+
+    if settings.AutoBounty then
+        for _,v in pairs(game.Players:GetPlayers()) do
+            if v ~= plr and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                local hum = v.Character:FindFirstChild("Humanoid")
+                local bounty = v:FindFirstChild("leaderstats") and v.leaderstats:FindFirstChild("Bounty")
+                if bounty and bounty.Value >= 100000 and hum and hum.Health > 0 then
+                    local myhrp = plr.Character:FindFirstChild("HumanoidRootPart")
+                    local target = v.Character.HumanoidRootPart.Position + Vector3.new(0,5,0)
+                    myhrp.CFrame = CFrame.new(target)
+                    break
+                end
+            end
+        end
+    end
+
+    if settings.KillAura then
+        for _,v in pairs(game.Players:GetPlayers()) do
+            if v ~= plr and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                local dist = (plr.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).Magnitude
+                local hum = v.Character:FindFirstChild("Humanoid")
+                if dist < 35 and hum and hum.Health > 0 then
+                    local keys = {"Z","X","C","V"}
+                    for _,k in pairs(keys) do
+                        game:GetService("VirtualInputManager"):SendKeyEvent(true, k, false, game)
+                        task.wait(0.05)
+                        game:GetService("VirtualInputManager"):SendKeyEvent(false, k, false, game)
+                    end
+                end
+            end
+        end
+    end
+end)
+
     if settings.NoCooldown then
         for _,v in pairs(getgc(true)) do
             if type(v) == "table" and rawget(v, "Cooldown") then
